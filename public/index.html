@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Report System</title>
+  <style>
+    :root {
+      --bg: #eff6ff;
+      --bg-panel: #ffffff;
+      --text: #0f172a;
+      --muted: #475569;
+      --primary: #4338ca;
+      --primary-strong: #2563eb;
+      --surface: #f8fafc;
+      --border: rgba(148, 163, 184, 0.25);
+      --success: #16a34a;
+      --danger: #dc2626;
+      --shadow: rgba(15, 23, 42, 0.08);
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; font-family: Inter, system-ui, sans-serif; background: radial-gradient(circle at top left, rgba(79, 70, 229, 0.14), transparent 28%), linear-gradient(180deg, #eff6ff 0%, #ffffff 100%); color: var(--text); }
+    button, input, select, textarea { font: inherit; }
+    a { color: inherit; text-decoration: none; }
+    .page { display: none; padding: 32px 18px 64px; max-width: 1100px; margin: 0 auto; }
+    .page.active { display: block; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 28px; flex-wrap: wrap; }
+    .topbar h1 { margin: 0; font-size: clamp(1.9rem, 3vw, 2.7rem); }
+    .topbar nav { display: flex; gap: 10px; flex-wrap: wrap; }
+    .hero, .auth-card, .dashboard-grid, .summary-cards, .students-list, .feature-grid { display: grid; gap: 18px; }
+    .hero { grid-template-columns: minmax(0, 1.1fr) minmax(320px, 1fr); align-items: center; padding: 40px; border-radius: 32px; background: rgba(255,255,255,0.92); box-shadow: 0 28px 80px var(--shadow); border: 1px solid var(--border); }
+    .badge { display: inline-flex; align-items: center; padding: 10px 16px; border-radius: 999px; background: rgba(79, 70, 229, 0.12); color: #4338ca; font-weight: 700; font-size: 0.9rem; }
+    .hero h2 { margin: 22px 0 16px; font-size: clamp(2.8rem, 4vw, 4.2rem); line-height: 1.02; }
+    .hero p { max-width: 680px; color: var(--muted); line-height: 1.8; }
+    .buttons { display: flex; flex-wrap: wrap; gap: 12px; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; border-radius: 14px; padding: 14px 22px; font-weight: 700; cursor: pointer; border: none; }
+    .btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-strong)); color: #fff; }
+    .btn-secondary { background: #fff; border: 1px solid rgba(79, 70, 229, 0.2); color: #4338ca; }
+    .hero-panel { padding: 32px; border-radius: 28px; background: linear-gradient(180deg, #ffffff, #eef2ff); border: 1px solid rgba(79, 70, 229, 0.15); box-shadow: 0 20px 60px rgba(15, 23, 42, 0.06); }
+    .hero-panel h3 { margin: 0 0 12px; }
+    .hero-panel p { margin: 0; color: var(--muted); line-height: 1.7; }
+    .feature-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-top: 22px; }
+    .feature-card { padding: 24px; border-radius: 24px; background: #fff; border: 1px solid var(--border); box-shadow: 0 18px 48px rgba(15, 23, 42, 0.06); }
+    .feature-card h3 { margin-top: 0; }
+    .feature-card p { color: var(--muted); line-height: 1.75; }
+    .auth-card, .panel { background: #fff; border-radius: 28px; border: 1px solid var(--border); box-shadow: 0 24px 70px rgba(15, 23, 42, 0.08); padding: 32px; }
+    .auth-card h2, .panel h2 { margin-top: 0; }
+    .form-group { display: grid; gap: 10px; }
+    label { color: var(--muted); font-size: 0.95rem; }
+    input, select, textarea { width: 100%; border: 1px solid var(--border); border-radius: 16px; padding: 14px 16px; background: #f8fafc; color: var(--text); transition: box-shadow 0.25s ease, border-color 0.25s ease; }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary-strong); box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12); }
+    textarea { min-height: 120px; resize: vertical; }
+    .form-grid { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+    .message { min-height: 24px; font-weight: 600; }
+    .message.success { color: var(--success); }
+    .message.error { color: var(--danger); }
+    .summary-cards { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-bottom: 20px; }
+    .summary-card { padding: 24px; border-radius: 24px; background: #fff; border: 1px solid var(--border); box-shadow: 0 16px 50px rgba(15, 23, 42, 0.06); }
+    .summary-card h3 { margin: 0 0 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.85rem; }
+    .summary-card p { margin: 0; font-size: 2rem; font-weight: 700; }
+    .students-list { grid-template-columns: 1fr; }
+    .student-card { padding: 24px; border-radius: 24px; background: #fff; border: 1px solid var(--border); box-shadow: 0 14px 40px rgba(15, 23, 42, 0.06); }
+    .student-card h3 { margin: 0 0 10px; }
+    .student-row { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+    .student-row div { color: var(--muted); }
+    .chip { display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 999px; background: rgba(59, 130, 246, 0.1); color: #1d4ed8; font-weight: 700; }
+    .subject-item { padding: 16px; border-radius: 18px; background: var(--surface); border: 1px solid rgba(148, 163, 184, 0.16); }
+    .dashboard-header { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; justify-content: space-between; margin-bottom: 24px; }
+    .dashboard-header h2 { margin: 0; }
+    .dashboard-header p { margin: 6px 0 0; color: var(--muted); }
+    .hidden { display: none; }
+    @media (max-width: 900px) { .hero { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="page active" id="landing-page">
+    <div class="topbar">
+      <h1>Student Report System</h1>
+      <nav>
+        <button class="btn btn-secondary" id="open-login">Login</button>
+        <button class="btn btn-secondary" id="open-register">Register</button>
+      </nav>
+    </div>
+    <section class="hero">
+      <div>
+        <span class="badge">School ERP</span>
+        <h2>Manage students, teachers, grades, and reports from one app.</h2>
+        <p>Register as a student, teacher, or admin, then use the dashboard to view or update student details, grades, attendance, and teacher remarks.</p>
+        <div class="buttons">
+          <button class="btn btn-primary" id="hero-login">Login</button>
+          <button class="btn btn-secondary" id="hero-register">Register</button>
+        </div>
+      </div>
+      <div class="hero-panel">
+        <h3>Teacher dashboard preview</h3>
+        <p>The dashboard shows profile details, student summary cards, and active student records with grades plus teacher notes.</p>
+      </div>
+    </section>
+    <section class="feature-grid">
+      <article class="feature-card"><h3>Secure accounts</h3><p>Login and register with role-based access for teachers, students, and admins.</p></article>
+      <article class="feature-card"><h3>Student detail</h3><p>Store student email, roll number, classroom, attendance, subjects, grades, and notes.</p></article>
+      <article class="feature-card"><h3>Teacher tools</h3><p>Teachers can add new student records and update grades in one place.</p></article>
+      <article class="feature-card"><h3>Dashboard summary</h3><p>See student counts, attendance averages, and quick role information without extra pages.</p></article>
+    </section>
+  </div>
+
+  <div class="page" id="auth-page">
+    <div class="topbar">
+      <h1 id="auth-title">Login</h1>
+      <nav>
+        <button class="btn btn-secondary" id="back-home">Back</button>
+      </nav>
+    </div>
+    <div class="auth-card">
+      <p id="auth-copy">Sign in to access the student report dashboard.</p>
+      <form id="auth-form">
+        <div id="register-fields" class="form-grid hidden">
+          <div class="form-group"><label for="name">Full Name</label><input id="name" name="name" type="text" placeholder="Ayesha Khan" required /></div>
+          <div class="form-group"><label for="role">Role</label><select id="role" name="role" required><option value="student">Student</option><option value="teacher">Teacher</option><option value="admin">Admin</option></select></div>
+        </div>
+        <div class="form-group"><label for="email">Email</label><input id="email" name="email" type="email" placeholder="example@school.com" required /></div>
+        <div class="form-group"><label for="password">Password</label><input id="password" name="password" type="password" placeholder="••••••••" required /></div>
+        <button class="btn btn-primary" type="submit" id="auth-submit">Login</button>
+      </form>
+      <p class="message" id="auth-message"></p>
+    </div>
+  </div>
+
+  <div class="page" id="dashboard-page">
+    <div class="topbar">
+      <div>
+        <h1>Dashboard</h1>
+        <p id="dashboard-welcome">Loading profile...</p>
+      </div>
+      <nav>
+        <button class="btn btn-secondary" id="logout-btn">Logout</button>
+      </nav>
+    </div>
+    <section class="summary-cards" id="summary-cards"></section>
+    <div class="dashboard-grid">
+      <section class="panel">
+        <h2>Profile</h2>
+        <div id="profile-box">Loading...</div>
+      </section>
+      <section class="panel" id="student-panel">
+        <h2>Student records</h2>
+        <div id="student-records">Loading...</div>
+      </section>
+    </div>
+    <section class="panel" id="teacher-panel">
+      <h2>Add Student Record</h2>
+      <form id="student-form">
+        <div class="form-grid">
+          <div class="form-group"><label for="student-name">Name</label><input id="student-name" name="name" type="text" placeholder="Student name" required /></div>
+          <div class="form-group"><label for="student-email">Email</label><input id="student-email" name="email" type="email" placeholder="student@school.com" required /></div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group"><label for="roll-number">Roll Number</label><input id="roll-number" name="rollNumber" type="text" placeholder="10A-01" required /></div>
+          <div class="form-group"><label for="classroom">Classroom</label><input id="classroom" name="classroom" type="text" placeholder="Grade 10" required /></div>
+        </div>
+        <div class="form-group"><label for="subjects">Subjects & grades</label><textarea id="subjects" name="subjects" placeholder="Math:A+, English:A, Science:A"></textarea></div>
+        <div class="form-group"><label for="notes">Notes</label><textarea id="notes" name="notes" placeholder="Teacher comments..."></textarea></div>
+        <button class="btn btn-primary" type="submit">Add student</button>
+      </form>
+      <p class="message" id="student-message"></p>
+    </section>
+  </div>
+
+  <script>
+    const landingPage = document.getElementById('landing-page');
+    const authPage = document.getElementById('auth-page');
+    const dashboardPage = document.getElementById('dashboard-page');
+    const authTitle = document.getElementById('auth-title');
+    const authCopy = document.getElementById('auth-copy');
+    const authForm = document.getElementById('auth-form');
+    const authMessage = document.getElementById('auth-message');
+    const registerFields = document.getElementById('register-fields');
+    const authSubmit = document.getElementById('auth-submit');
+    const dashboardWelcome = document.getElementById('dashboard-welcome');
+    const profileBox = document.getElementById('profile-box');
+    const summaryCards = document.getElementById('summary-cards');
+    const studentRecords = document.getElementById('student-records');
+    const teacherPanel = document.getElementById('teacher-panel');
+    const studentForm = document.getElementById('student-form');
+    const studentMessage = document.getElementById('student-message');
+    const backHome = document.getElementById('back-home');
+    const openLogin = document.getElementById('open-login');
+    const openRegister = document.getElementById('open-register');
+    const heroLogin = document.getElementById('hero-login');
+    const heroRegister = document.getElementById('hero-register');
+    const logoutBtn = document.getElementById('logout-btn');
+    const MONGO_API = '/api';
+
+    let currentMode = 'login';
+
+    function show(page) {
+      landingPage.classList.remove('active');
+      authPage.classList.remove('active');
+      dashboardPage.classList.remove('active');
+      if (page === 'landing') landingPage.classList.add('active');
+      if (page === 'auth') authPage.classList.add('active');
+      if (page === 'dashboard') dashboardPage.classList.add('active');
+    }
+
+    function setAuthMode(mode) {
+      currentMode = mode;
+      authMessage.textContent = '';
+      if (mode === 'login') {
+        authTitle.textContent = 'Login';
+        authCopy.textContent = 'Sign in to access the student report dashboard.';
+        authSubmit.textContent = 'Login';
+        registerFields.classList.add('hidden');
+        registerFields.style.display = 'none';
+      } else {
+        authTitle.textContent = 'Register';
+        authCopy.textContent = 'Create an account as a student, teacher, or admin.';
+        authSubmit.textContent = 'Register';
+        registerFields.classList.remove('hidden');
+        registerFields.style.display = 'grid';
+      }
+      show('auth');
+    }
+
+    function getToken() {
+      return localStorage.getItem('authToken');
+    }
+
+    function getUser() {
+      return JSON.parse(localStorage.getItem('authUser') || 'null');
+    }
+
+    function saveSession(token, user) {
+      localStorage.setItem('authToken', token);
+      localStorage.setItem('authUser', JSON.stringify(user));
+    }
+
+    function clearSession() {
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('authUser');
+    }
+
+    function authHeaders() {
+      const token = getToken();
+      return token ? { Authorization: `Bearer ${token}` } : {};
+    }
+
+    async function request(url, options = {}) {
+      const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+      const response = await fetch(url, { ...options, headers });
+      const text = await response.text();
+      let data = {};
+      if (text) {
+        try {
+          data = JSON.parse(text);
+        } catch (error) {
+          console.error('Invalid JSON response:', text);
+          throw new Error(`Server returned invalid response (${response.status})`);
+        }
+      }
+      if (!response.ok) {
+        throw new Error(data.message || `Server error ${response.status}`);
+      }
+      return data;
+    }
+
+    function renderProfile(user) {
+      profileBox.innerHTML = `<p><strong>Name</strong>: ${user.name}</p><p><strong>Email</strong>: ${user.email}</p><p><strong>Role</strong>: ${user.role}</p>`;
+      dashboardWelcome.textContent = `Hello ${user.name}, you are signed in as ${user.role}.`;
+      if (user.role !== 'teacher') {
+        teacherPanel.style.display = 'none';
+      } else {
+        teacherPanel.style.display = 'block';
+      }
+    }
+
+    function renderSummary(students, user) {
+      const total = students.length;
+      const avgAttendance = total ? Math.round(students.reduce((sum, student) => sum + (student.attendance || 0), 0) / total) : 0;
+      summaryCards.innerHTML = `
+        <div class="summary-card"><h3>${user.role === 'teacher' ? 'Assigned Students' : 'My Student Cards'}</h3><p>${total}</p></div>
+        <div class="summary-card"><h3>Attendance</h3><p>${avgAttendance}%</p></div>
+        <div class="summary-card"><h3>Role</h3><p>${user.role}</p></div>
+      `;
+    }
+
+    function renderStudents(students) {
+      if (!students.length) {
+        studentRecords.innerHTML = '<p style="color: var(--muted);">No student records available yet.</p>';
+        return;
+      }
+      studentRecords.innerHTML = students.map((student) => {
+        const teacherName = student.assignedTeacher ? student.assignedTeacher.name : 'N/A';
+        const subjects = (student.subjects || []).map(sub => `<div class="subject-item"><strong>${sub.name}</strong><p>Grade: ${sub.grade}</p><p>${sub.remark || 'No remarks'}</p></div>`).join('');
+        return `
+          <div class="student-card">
+            <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:start;">
+              <div><h3>${student.name}</h3><div class="student-row"><div>Email: ${student.email}</div><div>Roll: ${student.rollNumber}</div><div>Class: ${student.classroom}</div></div></div>
+              <span class="chip">Teacher: ${teacherName}</span>
+            </div>
+            <div class="student-row" style="margin:18px 0 0;"><div><strong>Attendance</strong><p>${student.attendance || 0}%</p></div></div>
+            <div style="margin-top:18px;"><strong>Subjects</strong>${subjects || '<p style="color: var(--muted);">No subjects added.</p>'}</div>
+            <div style="margin-top:18px;"><strong>Notes</strong><p style="color: var(--muted);">${student.notes || 'No notes.'}</p></div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function loadDashboard() {
+      try {
+        const me = await request(`${MONGO_API}/auth/me`, { method: 'GET', headers: authHeaders() });
+        renderProfile(me.user);
+        const students = await request(`${MONGO_API}/students`, { method: 'GET', headers: authHeaders() });
+        renderSummary(students, me.user);
+        renderStudents(students);
+        show('dashboard');
+      } catch (error) {
+        clearSession();
+        show('landing');
+      }
+    }
+
+    authForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      authMessage.textContent = '';
+      authMessage.className = 'message';
+      const formData = new FormData(authForm);
+      const emailValue = (formData.get('email') || '').toString().trim();
+      const passwordValue = (formData.get('password') || '').toString().trim();
+      const payload = {
+        email: emailValue,
+        password: passwordValue
+      };
+
+      if (currentMode === 'register') {
+        payload.name = (formData.get('name') || '').toString().trim();
+        payload.role = (formData.get('role') || 'student').toString();
+      }
+
+      if (!payload.email || !payload.password || (currentMode === 'register' && !payload.name)) {
+        authMessage.textContent = currentMode === 'register'
+          ? 'Full name, email, and password are required to register.'
+          : 'Email and password are required to login.';
+        authMessage.classList.add('error');
+        return;
+      }
+
+      try {
+        console.debug('Auth submit payload:', currentMode, payload);
+        const data = await request(`${MONGO_API}/auth/${currentMode}`, { method: 'POST', body: JSON.stringify(payload) });
+        saveSession(data.token, data.user);
+        await loadDashboard();
+      } catch (err) {
+        authMessage.textContent = err.message;
+        authMessage.classList.add('error');
+      }
+    });
+
+    studentForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      studentMessage.textContent = '';
+      studentMessage.className = 'message';
+      const formData = new FormData(studentForm);
+      const subjectsText = formData.get('subjects').trim();
+      const subjects = subjectsText ? subjectsText.split(',').map(item => {
+        const [name, grade] = item.split(':').map(part => part.trim());
+        return { name: name || 'Subject', grade: grade || 'N/A', remark: '' };
+      }) : [];
+      const payload = {
+        name: formData.get('name').trim(),
+        email: formData.get('email').trim(),
+        rollNumber: formData.get('rollNumber').trim(),
+        classroom: formData.get('classroom').trim(),
+        subjects,
+        notes: formData.get('notes').trim()
+      };
+      try {
+        await request(`${MONGO_API}/students`, { method: 'POST', headers: authHeaders(), body: JSON.stringify(payload) });
+        studentMessage.textContent = 'Student record added successfully.';
+        studentMessage.classList.add('success');
+        studentForm.reset();
+        await loadDashboard();
+      } catch (err) {
+        studentMessage.textContent = err.message;
+        studentMessage.classList.add('error');
+      }
+    });
+
+    openLogin.addEventListener('click', () => setAuthMode('login'));
+    openRegister.addEventListener('click', () => setAuthMode('register'));
+    heroLogin.addEventListener('click', () => setAuthMode('login'));
+    heroRegister.addEventListener('click', () => setAuthMode('register'));
+    backHome.addEventListener('click', () => show('landing'));
+    logoutBtn.addEventListener('click', () => { clearSession(); show('landing'); });
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (getToken()) await loadDashboard();
+      else show('landing');
+    });
+  </script>
+</body>
+</html>
